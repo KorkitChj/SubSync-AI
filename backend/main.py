@@ -26,7 +26,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-storage_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "storage")
+base_dir = os.path.abspath(".")
+storage_path = os.path.join(base_dir, "backend_storage")
 os.makedirs(storage_path, exist_ok=True)
 app.mount("/api/storage", StaticFiles(directory=storage_path), name="storage")
 
@@ -39,7 +40,7 @@ def read_videos(db: Session = Depends(get_db)):
             "name": v.original_filename,
             "timestamp": v.created_at.isoformat(),
             "duration": 0,
-            "url": f"http://localhost:8000/api/storage/uploads/{v.id}/{v.original_filename}",
+            "url": f"/api/storage/uploads/{v.id}/{v.original_filename}",
             "is_favorite": v.is_favorite
         }
         for v in videos
@@ -77,7 +78,7 @@ def upload_video(file: UploadFile = File(...), db: Session = Depends(get_db)):
         "name": new_video.original_filename,
         "timestamp": "Just now",
         "duration": 0,
-        "url": f"http://localhost:8000/api/storage/uploads/{new_video.id}/{new_video.original_filename}"
+        "url": f"/api/storage/uploads/{new_video.id}/{new_video.original_filename}"
     }
 
 @app.get("/api/videos/{video_id}/subtitles")

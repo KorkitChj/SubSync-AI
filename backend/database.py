@@ -1,7 +1,14 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./subtitle_generator.db"
+import os
+base_dir = os.path.abspath(".")
+os.makedirs(base_dir, exist_ok=True)
+db_path = os.path.join(base_dir, "subtitle_generator.db")
+# Ensure the path is compatible with SQLAlchemy SQLite URL format
+db_url = f"sqlite:///{db_path}"
+
+SQLALCHEMY_DATABASE_URL = db_url
 # If we were using PostgreSQL, the URL would look like:
 # SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
 

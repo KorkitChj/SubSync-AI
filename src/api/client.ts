@@ -15,7 +15,7 @@ export interface SubtitleBlock {
   translatedText: string;
 }
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = import.meta.env.DEV ? 'http://localhost:8000' : '';
 
 export async function uploadVideo(file: File): Promise<VideoFile> {
   const formData = new FormData();

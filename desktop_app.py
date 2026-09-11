@@ -20,7 +20,7 @@ def get_resource_path(relative_path):
     return os.path.join(os.path.abspath("."), relative_path)
 
 # Serve the React SPA from FastAPI
-dist_path = get_resource_path("dist")
+dist_path = get_resource_path("frontend_dist")
 
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):

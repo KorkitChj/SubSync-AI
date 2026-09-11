@@ -15,6 +15,7 @@ import {
   Play,
   RotateCcw,
   RotateCw,
+  RefreshCw,
   Volume2,
   Volume1,
   VolumeX,
@@ -250,6 +251,13 @@ function Header({
           <FileVideo size={16} className="text-primary-400 flex-shrink-0" />
           <span className="text-slate-200 font-medium truncate">{activeVideo?.name || 'No video selected'}</span>
         </div>
+        <button
+          onClick={() => window.location.reload()}
+          className="text-slate-400 hover:text-slate-200 transition-colors p-1.5 rounded-lg hover:bg-slate-800 ml-2"
+          title="Reload App"
+        >
+          <RefreshCw size={18} />
+        </button>
       </div>
       <div className="flex items-center gap-6">
 
@@ -361,6 +369,7 @@ function SubtitleCard({
           rows={2}
           value={block.translatedText}
           onChange={(e) => onChange(block.id, e.target.value)}
+          onFocus={() => onSeek(block.startTime)}
           onBlur={() => onBlur && onBlur(block.id)}
           placeholder="Translate here..."
         />
@@ -391,6 +400,7 @@ function SubtitleCard({
         rows={2}
         value={block.translatedText}
         onChange={(e) => onChange(block.id, e.target.value)}
+        onFocus={() => onSeek(block.startTime)}
         onBlur={() => onBlur && onBlur(block.id)}
         placeholder="Translate here..."
       />
@@ -400,11 +410,12 @@ function SubtitleCard({
 
 // --- Main App ---
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true');
   const [loginUser, setLoginUser] = useState("");
   const [loginPass, setLoginPass] = useState("");
   const [loginError, setLoginError] = useState("");
   const [apiError, setApiError] = useState<string | null>(null);
+  const savedTimes = useRef<Record<string, number>>({});
 
   const [recentFiles, setRecentFiles] = useState<VideoFile[]>([]);
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
@@ -568,6 +579,9 @@ export default function App() {
   const handleTimeUpdate = () => {
     if (videoRef.current) {
       setCurrentTime(videoRef.current.currentTime);
+      if (activeVideoId) {
+        savedTimes.current[activeVideoId] = videoRef.current.currentTime;
+      }
     }
   };
 
@@ -575,6 +589,10 @@ export default function App() {
     if (videoRef.current) {
       const vidDuration = videoRef.current.duration;
       setDuration(vidDuration);
+
+      if (activeVideoId && savedTimes.current[activeVideoId]) {
+        videoRef.current.currentTime = savedTimes.current[activeVideoId];
+      }
 
       // Update the recent files duration property if it's a newly uploaded video (duration 0 initially)
       if (activeVideo && activeVideo.duration === 0) {
@@ -812,6 +830,7 @@ export default function App() {
       e.preventDefault();
       if (loginUser === "admin" && loginPass === "1234") {
         setIsLoggedIn(true);
+        localStorage.setItem('isLoggedIn', 'true');
         setLoginError("");
       } else {
         setLoginError("Invalid credentials");
@@ -895,7 +914,10 @@ export default function App() {
           targetLanguage={targetLanguage}
           onLanguageChange={setTargetLanguage}
           isTranslating={isTranslating}
-          onLogout={() => setIsLoggedIn(false)}
+          onLogout={() => {
+            setIsLoggedIn(false);
+            localStorage.removeItem('isLoggedIn');
+          }}
         />
 
         {/* Workspace Split Layout */}
@@ -992,7 +1014,7 @@ export default function App() {
               <video
                 ref={videoRef}
                 src={activeVideoUrl}
-                className="w-full h-full object-cover opacity-80"
+                className="w-full h-full object-contain opacity-80"
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
                 onClick={togglePlay}

@@ -26,7 +26,8 @@ load_dotenv(dotenv_path=env_path)
 client = genai.Client()
 
 # Define base storage directory relative to backend
-STORAGE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "storage", "uploads")
+base_dir = os.path.abspath(".")
+STORAGE_DIR = os.path.join(base_dir, "backend_storage", "uploads")
 # Ensure storage directory exists
 os.makedirs(STORAGE_DIR, exist_ok=True)
 
@@ -110,6 +111,9 @@ def extract_audio(video_path: str) -> str:
     try:
         print(f"Extracting audio to {audio_path} at 64k...")
         subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except FileNotFoundError:
+        print("FFmpeg not found in PATH!")
+        raise HTTPException(status_code=500, detail="FFmpeg is missing! Please install FFmpeg and add it to your PATH.")
     except subprocess.CalledProcessError as e:
         print(f"FFmpeg error: {e.stderr.decode()}")
         raise HTTPException(status_code=500, detail="Failed to extract audio from video.")
