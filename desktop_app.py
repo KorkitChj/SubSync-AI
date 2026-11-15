@@ -24,11 +24,12 @@ dist_path = get_resource_path("frontend_dist")
 
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):
-    file_path = os.path.join(dist_path, full_path)
-    if os.path.isfile(file_path):
+    real_dist = os.path.realpath(dist_path)
+    file_path = os.path.realpath(os.path.join(real_dist, full_path))
+    if file_path.startswith(real_dist + os.sep) and os.path.isfile(file_path):
         return FileResponse(file_path)
     # Fallback to index.html for client-side routing
-    index_path = os.path.join(dist_path, "index.html")
+    index_path = os.path.join(real_dist, "index.html")
     if os.path.exists(index_path):
          return FileResponse(index_path)
     return {"message": "Frontend not built yet. Run 'npm run build'."}

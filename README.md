@@ -1,32 +1,97 @@
-# React + TypeScript + Vite
+# SubSync AI
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+An AI-powered video subtitle generator and translator built with **React**, **TypeScript**, **FastAPI**, **SQLite**, and **Google Gemini**.
 
-Currently, two official plugins are available:
+> [!NOTE]
+> SubSync AI is designed for **local / desktop use** (via `pywebview` or local dev servers). The built-in login screen is a client-side demo gate, and backend endpoints do not enforce server-side authentication. Do not expose the backend directly to the public internet without adding proper authentication and rate limiting.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Upload videos and extract audio automatically with **FFmpeg**
+- Single-pass transcription & translation into target languages using **Gemini**
+- Interactive subtitle timeline & block editor with live video sync
+- Save edits, track revision history, and favorite videos
+- Daily API usage tracking
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Prerequisites
 
-## Expanding the Oxlint configuration
+- **Python** 3.10+
+- **Node.js** 18+ and npm
+- **FFmpeg** installed and available in your system `PATH`
+- A **Google Gemini API Key**
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Setup
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/KorkitChj/SubSync-AI.git
+cd SubSync-AI
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+### 2. Backend setup
+
+```bash
+python -m venv .venv
+# Windows (PowerShell)
+.\.venv\Scripts\Activate.ps1
+# macOS / Linux
+# source .venv/bin/activate
+
+pip install -r backend/requirements.txt
+```
+
+Create `backend/.env` from the example file and add your Gemini API key:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Edit `backend/.env`:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+### 3. Frontend setup
+
+```bash
+npm install
+```
+
+## Running the App
+
+### Option A: Development Mode (Frontend + Backend)
+
+Start the FastAPI backend:
+
+```bash
+uvicorn backend.main:app --reload --port 8000
+```
+
+In a separate terminal, start the Vite dev server:
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:5173` in your browser.
+
+### Option B: Desktop App Mode (`pywebview`)
+
+Build the frontend into `frontend_dist/` and launch the desktop window:
+
+```bash
+npm run build
+python desktop_app.py
+```
+
+## Tech Stack
+
+- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons
+- **Backend:** FastAPI, SQLAlchemy, SQLite, Pydantic, Google GenAI SDK (`google-genai`)
+- **Desktop Wrapper:** pywebview, Uvicorn
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

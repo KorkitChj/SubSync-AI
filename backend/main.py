@@ -17,10 +17,19 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Video Subtitle Generator MVP")
 
-# Allow CORS for React frontend (adjust origins in production)
+# Allow CORS for local frontend dev and desktop app (override via CORS_ORIGINS env var)
+default_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+cors_env = os.getenv("CORS_ORIGINS", "")
+allow_origins = [o.strip() for o in cors_env.split(",") if o.strip()] if cors_env else default_origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -59,7 +68,10 @@ def upload_video(file: UploadFile = File(...), db: Session = Depends(get_db)):
     storage_dir = os.path.join(storage_path, "uploads", video_id)
     os.makedirs(storage_dir, exist_ok=True)
     
-    filename = file.filename or f"video_{video_id}.mp4"
+    raw_name = os.path.basename(file.filename or "").strip()
+    if not raw_name or raw_name in {".", ".."}:
+        raw_name = f"video_{video_id}.mp4"
+    filename = raw_name
     file_path = os.path.join(storage_dir, filename)
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)

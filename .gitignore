@@ -27,6 +27,7 @@ dist-ssr
 .venv/
 backend/venv/
 backend/storage/
+backend_storage/
 *.db
 
 # Python and PyInstaller
